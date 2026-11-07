@@ -4,11 +4,11 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 
-// Abilita le chiamate da qualsiasi dominio (CORS)
+// Permette le richieste da Vercel (CORS)
 app.use(cors());
 app.use(express.json());
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 app.get('/', (req, res) => {
   res.send('Server AutoCal AI Online e Funzionante!');
@@ -23,13 +23,13 @@ app.post('/api/parse-event', async (req, res) => {
     }
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent(`Estrai i dettagli dell'evento da questo testo: "${prompt}". Rispondi esclusivamente in formato JSON con i campi: title, date, time, location.`);
+    const result = await model.generateContent(`Estrai i dettagli dell'evento dal testo: "${prompt}". Rispondi in JSON con i campi: title, date, time, location.`);
     const responseText = await result.response.text();
 
     res.json({ success: true, data: responseText });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Errore nell\'elaborazione con Gemini AI' });
+    res.status(500).json({ message: 'Errore interno del server backend' });
   }
 });
 
